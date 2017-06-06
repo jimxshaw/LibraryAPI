@@ -34,5 +34,26 @@ namespace Library.API.Controllers
 
             return Ok(booksForAuthor);
         }
+
+        [HttpGet("{bookId}")]
+        public IActionResult GetBookForAuthor(Guid authorId, Guid bookId)
+        {
+            // We still have to test whether or not the requested author exists.
+            if (!_libraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookForAuthorFromRepo = _libraryRepository.GetBookForAuthor(authorId, bookId);
+
+            if (bookForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var bookForAuthor = Mapper.Map<BookDto>(bookForAuthorFromRepo);
+
+            return Ok(bookForAuthor);
+        }
     }
 }
