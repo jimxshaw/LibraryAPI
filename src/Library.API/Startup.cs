@@ -13,6 +13,7 @@ using Library.API.Entities;
 using Microsoft.EntityFrameworkCore;
 using Library.API.Models;
 using Library.API.Helpers;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Library.API
 {
@@ -35,7 +36,17 @@ namespace Library.API
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc(setupAction =>
+            {
+                // If this is false then the API will return responses in
+                // the default format, which is JSON, if an unsupported media type is part
+                // of the request.
+                setupAction.ReturnHttpNotAcceptable = true;
+
+                // When no Accept header is added to the request, the default formatter chosen is
+                // always the first one added to this list.
+                setupAction.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+            });
 
             // register the DbContext on the container, getting the connection string from
             // appSettings (note: use this during development; in a production environment,
