@@ -1,4 +1,6 @@
-﻿using Library.API.Helpers;
+﻿using AutoMapper;
+using Library.API.Entities;
+using Library.API.Helpers;
 using Library.API.Models;
 using Library.API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -26,19 +28,8 @@ namespace Library.API.Controllers
             // Retrieve authors entity.
             var authorsFromRepo = _libraryRepository.GetAuthors();
 
-            // Map entity to DTO.
-            var authors = new List<AuthorDto>();
-
-            foreach (var author in authorsFromRepo)
-            {
-                authors.Add(new AuthorDto
-                {
-                    Id = author.Id,
-                    Name = $"{author.FirstName} {author.LastName}",
-                    Age = author.DateOfBirth.GetCurrentAge(),
-                    Genre = author.Genre
-                });
-            }
+            // Use automapper to map entity to DTO.
+            var authors = Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
 
             return new JsonResult(authors);
         }
