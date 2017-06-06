@@ -59,7 +59,16 @@ namespace Library.API
             }
             else
             {
-                app.UseExceptionHandler();
+                // Whenever an exception is thrown globally, we'll handle it by 
+                // throwing a 500 status and a custom message.
+                app.UseExceptionHandler(appBuilder =>
+                {
+                    appBuilder.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An unexpected fault happened. Try again later");
+                    });
+                });
             }
 
             // Install AutoMapper from Nuget and place mappings in the Configure 
