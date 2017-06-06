@@ -80,6 +80,9 @@ namespace Library.API
                 config.CreateMap<Author, AuthorDto>()
                         .ForMember(dest => dest.Name, option => option.MapFrom(src => $"{src.FirstName} {src.LastName}"))
                         .ForMember(dest => dest.Age, option => option.MapFrom(src => src.DateOfBirth.GetCurrentAge()));
+
+                // No projections necessarily as it's a flat mapping from source to destination.
+                config.CreateMap<Book, BookDto>();
             });
 
             libraryContext.EnsureSeedDataForContext();
