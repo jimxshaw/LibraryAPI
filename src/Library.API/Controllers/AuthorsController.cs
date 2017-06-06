@@ -31,7 +31,10 @@ namespace Library.API.Controllers
             // Use automapper to map entity to DTO.
             var authors = Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
 
-            return new JsonResult(authors);
+            // We always return Ok because even when there are no authors,
+            // the underlying authors entity still exist.... it'd be just an
+            // empty collection. No need to return 404.
+            return Ok(authors);
         }
 
         [HttpGet("{id}")]
@@ -39,9 +42,14 @@ namespace Library.API.Controllers
         {
             var authorFromRepo = _libraryRepository.GetAuthor(id);
 
+            if (authorFromRepo == null)
+            {
+                return NotFound();
+            }
+
             var author = Mapper.Map<AuthorDto>(authorFromRepo);
 
-            return new JsonResult(author);
+            return Ok(author);
         }
     }
 }
