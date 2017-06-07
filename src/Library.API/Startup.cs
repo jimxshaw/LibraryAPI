@@ -94,6 +94,8 @@ namespace Library.API
 
                 // No projections necessarily as it's a flat mapping from source to destination.
                 config.CreateMap<Book, BookDto>();
+
+                config.CreateMap<AuthorForCreationDto, Author>();
             });
 
             libraryContext.EnsureSeedDataForContext();
