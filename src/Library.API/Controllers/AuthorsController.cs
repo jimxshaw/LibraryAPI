@@ -97,5 +97,29 @@ namespace Library.API.Controllers
 
             return NotFound();
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteAuthor(Guid id)
+        {
+            var authorFromRepo = _libraryRepository.GetAuthor(id);
+
+            if (authorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            // Cascading delete is on by default. When an author is deleted
+            // then its child book entities are deleted as well.
+            _libraryRepository.DeleteAuthor(authorFromRepo);
+
+            if (!_libraryRepository.Save())
+            {
+                throw new Exception("Deleting an author failed on saved.");
+            }
+
+            // After deletion, no content signifies the request was 
+            // successful but doesn't have a response body.
+            return NoContent();
+        }
     }
 }
