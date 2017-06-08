@@ -46,6 +46,8 @@ namespace Library.API
                 // When no Accept header is added to the request, the default formatter chosen is
                 // always the first one added to this list.
                 setupAction.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+
+                setupAction.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
             });
 
             // register the DbContext on the container, getting the connection string from
