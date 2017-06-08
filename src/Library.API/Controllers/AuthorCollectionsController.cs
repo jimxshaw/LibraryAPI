@@ -42,7 +42,10 @@ namespace Library.API.Controllers
                 throw new Exception("Creating an author collection failed on save.");
             }
 
-            return Ok();
+            var authorCollectionToReturn = Mapper.Map<IEnumerable<AuthorDto>>(authorEntities);
+            var idsAsString = string.Join(",", authorCollectionToReturn.Select(a => a.Id));
+
+            return CreatedAtRoute("GetAuthorCollection", new { ids = idsAsString }, authorCollectionToReturn);
         }
 
         // (key1, key2, ...)
