@@ -132,7 +132,19 @@ namespace Library.API.Controllers
 
             if (bookForAuthorFromRepo == null)
             {
-                return NotFound();
+                // If the book doesn't exist then we want to create it.
+                var bookToAdd = Mapper.Map<Book>(book);
+                bookToAdd.Id = id;
+
+                _libraryRepository.AddBookForAuthor(authorId, bookToAdd);
+                if (!_libraryRepository.Save())
+                {
+                    throw new Exception("Creating a book failed on save.");
+                }
+
+                var bookToReturn = Mapper.Map<BookDto>(bookToAdd);
+
+                return CreatedAtRoute("GetBookForAuthor", new { authorId = authorId, id = bookToReturn.Id }, bookToReturn);
             }
 
             // Map, apply update, map back to entity. All this is done
