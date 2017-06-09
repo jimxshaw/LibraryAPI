@@ -114,5 +114,47 @@ namespace Library.API.Controllers
             // successful but doesn't have a response body.
             return NoContent();
         }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateBookForAuthor(Guid authorId, Guid id, [FromBody] BookForUpdateDto book)
+        {
+            if (book == null)
+            {
+                return BadRequest();
+            }
+
+            if (!_libraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookForAuthorFromRepo = _libraryRepository.GetBookForAuthor(authorId, id);
+
+            if (bookForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            // Map, apply update, map back to entity. All this is done
+            // in a single statement with AutoMapper.
+            Mapper.Map(book, bookForAuthorFromRepo);
+
+            // The repo's UpdateBookForAuthor method implementation is actually empty.
+            // The reason is because with EF Core, entities are tracked by context. By
+            // executing the above AutoMapper's Map method, the entity has already changed
+            // to a modified state and calling save will write said changes to the database.
+            // So if that's the case then why are we still calling the empty UpdateBookForAuthor
+            // method? For readability purposes and to follow proper conventions with the 
+            // repository pattern.
+            _libraryRepository.UpdateBookForAuthor(bookForAuthorFromRepo);
+
+            if (!_libraryRepository.Save())
+            {
+                throw new Exception($"Updating a book failed on save.");
+            }
+
+            // For PUTs, we can return 200 Ok or 204 No Content.
+            return NoContent();
+        }
     }
 }
