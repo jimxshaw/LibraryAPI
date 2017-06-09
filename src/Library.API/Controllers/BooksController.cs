@@ -187,7 +187,26 @@ namespace Library.API.Controllers
 
             if (bookForAuthorFromRepo == null)
             {
-                return NotFound();
+                // If the book to patch doesn't exist then we need to create it but just having
+                // a patch document isn't enough. We need to apply the patch document to a DTO and
+                // then create the entity.
+                // Note, those fields that are not part of the patch document will keep their default values.
+                var bookDto = new BookForUpdateDto();
+                patchDoc.ApplyTo(bookDto);
+
+                var bookToAdd = Mapper.Map<Book>(bookDto);
+                bookToAdd.Id = id;
+
+                _libraryRepository.AddBookForAuthor(authorId, bookToAdd);
+
+                if (!_libraryRepository.Save())
+                {
+                    throw new Exception("Creating a book failed on save.");
+                }
+
+                var bookToReturn = Mapper.Map<BookDto>(bookToAdd);
+
+                return CreatedAtRoute("GetBookForAuthor", new { authorId = authorId, id = bookToReturn.Id }, bookToReturn);
             }
 
             var bookToPatch = Mapper.Map<BookForUpdateDto>(bookForAuthorFromRepo);
