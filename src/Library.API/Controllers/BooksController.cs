@@ -136,6 +136,17 @@ namespace Library.API.Controllers
                 return BadRequest();
             }
 
+            if (book.Description == book.Title)
+            {
+                ModelState.AddModelError(nameof(BookForUpdateDto), "The description should be different from the title.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Return status code 422 Unprocessable Entity.
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             if (!_libraryRepository.AuthorExists(authorId))
             {
                 return NotFound();
