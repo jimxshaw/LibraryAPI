@@ -215,7 +215,21 @@ namespace Library.API.Controllers
                 // then create the entity.
                 // Note, those fields that are not part of the patch document will keep their default values.
                 var bookDto = new BookForUpdateDto();
-                patchDoc.ApplyTo(bookDto);
+                patchDoc.ApplyTo(bookDto, ModelState);
+
+                if (bookDto.Description == bookDto.Title)
+                {
+                    ModelState.AddModelError(nameof(BookForUpdateDto), "The description should be different from the title.");
+                }
+
+                // This triggers validation on book to patch and any errors
+                // will end up on the Model State.
+                TryValidateModel(bookDto);
+
+                if (!ModelState.IsValid)
+                {
+                    return new UnprocessableEntityObjectResult(ModelState);
+                }
 
                 var bookToAdd = Mapper.Map<Book>(bookDto);
                 bookToAdd.Id = id;
