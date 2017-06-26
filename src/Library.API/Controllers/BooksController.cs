@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Library.API.Entities;
+using Library.API.Helpers;
 using Library.API.Models;
 using Library.API.Services;
 using Microsoft.AspNetCore.JsonPatch;
@@ -64,6 +65,12 @@ namespace Library.API.Controllers
             if (book == null)
             {
                 return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Return status code 422 Unprocessable Entity.
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             // An additional check we have to do when creating child entities is if
