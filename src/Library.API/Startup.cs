@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using Library.API.Models;
 using Library.API.Helpers;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Diagnostics;
+using NLog.Extensions.Logging;
 
 namespace Library.API
 {
@@ -66,6 +68,14 @@ namespace Library.API
         {
             loggerFactory.AddConsole();
 
+            loggerFactory.AddDebug(LogLevel.Information);
+
+            // To configure a custom logger, either call add provider on the logger factory
+            // and then passing in an instance of a specific logger object or check if that
+            // custom logger package has a useful extension method the factory can use.
+            //loggerFactory.AddProvider(new NLog.Extensions.Logging.NLogLoggerProvider());
+            loggerFactory.AddNLog();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -78,6 +88,12 @@ namespace Library.API
                 {
                     appBuilder.Run(async context =>
                     {
+                        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+                        if (exceptionHandlerFeature != null)
+                        {
+                            var logger = loggerFactory.CreateLogger("Global exception logger");
+                            logger.LogError(500, exceptionHandlerFeature.Error, exceptionHandlerFeature.Error.Message);
+                        }
                         context.Response.StatusCode = 500;
                         await context.Response.WriteAsync("An unexpected fault happened. Try again later");
                     });

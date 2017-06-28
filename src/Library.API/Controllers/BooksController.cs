@@ -5,6 +5,7 @@ using Library.API.Models;
 using Library.API.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,13 @@ namespace Library.API.Controllers
     public class BooksController : Controller
     {
         private ILibraryRepository _libraryRepository;
+        private ILogger<BooksController> _logger;
 
-        public BooksController(ILibraryRepository libraryRepository)
+        public BooksController(ILibraryRepository libraryRepository,
+                                ILogger<BooksController> logger)
         {
             _libraryRepository = libraryRepository;
+            _logger = logger;
         }
 
         [HttpGet()]
@@ -122,6 +126,8 @@ namespace Library.API.Controllers
             {
                 throw new Exception("Deleting a book failed on save.");
             }
+
+            _logger.LogInformation(100, $"Book {id} for author {authorId} was deleted.");
 
             // After deletion, no content signifies the request was 
             // successful but doesn't have a response body.
@@ -249,6 +255,7 @@ namespace Library.API.Controllers
             var bookToPatch = Mapper.Map<BookForUpdateDto>(bookForAuthorFromRepo);
 
             patchDoc.ApplyTo(bookToPatch, ModelState);
+            //patchDoc.ApplyTo(bookToPatch);
 
             if (bookToPatch.Description == bookToPatch.Title)
             {
