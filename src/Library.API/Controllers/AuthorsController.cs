@@ -16,6 +16,7 @@ namespace Library.API.Controllers
     [Route("api/authors")]
     public class AuthorsController : Controller
     {
+
         private ILibraryRepository _libraryRepository;
 
         public AuthorsController(ILibraryRepository libraryRepository)
@@ -24,10 +25,16 @@ namespace Library.API.Controllers
         }
 
         [HttpGet()]
-        public IActionResult GetAuthors()
+        public IActionResult GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
+            // Allow pagination by having a AuthorsResourceParameters helper class. The properties in that class has 
+            // default values. User input values for pagination comes from the query string.
+            // By passing a helper class into this http get action, any user input query string containing pageSize
+            // and pageNumber will automatically be matched up to their respective properties within the helper class.
+
+
             // Retrieve authors entity.
-            var authorsFromRepo = _libraryRepository.GetAuthors();
+            var authorsFromRepo = _libraryRepository.GetAuthors(authorsResourceParameters);
 
             // Use automapper to map entity to DTO.
             var authors = Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);

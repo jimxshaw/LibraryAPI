@@ -1,4 +1,5 @@
 ﻿using Library.API.Entities;
+using Library.API.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,9 +65,18 @@ namespace Library.API.Services
             return _context.Authors.FirstOrDefault(a => a.Id == authorId);
         }
 
-        public IEnumerable<Author> GetAuthors()
+        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
-            return _context.Authors.OrderBy(a => a.FirstName).ThenBy(a => a.LastName);
+            // Paging options come last because we want to page after the retrieved
+            // collection has been sorted, filtered or searched.
+            return _context.Authors
+                            .OrderBy(a => a.FirstName)
+                            .ThenBy(a => a.LastName)
+                            // E.g. If page 2 is requested then the items on page 1 is skipped and then take the
+                            // current page size.
+                            .Skip(authorsResourceParameters.PageSize * (authorsResourceParameters.PageNumber - 1))
+                            .Take(authorsResourceParameters.PageSize)
+                            .ToList();
         }
 
         public IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds)
