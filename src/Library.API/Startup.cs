@@ -16,6 +16,9 @@ using Library.API.Helpers;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Diagnostics;
 using NLog.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Library.API
 {
@@ -60,6 +63,19 @@ namespace Library.API
 
             // register the repository
             services.AddScoped<ILibraryRepository, LibraryRepository>();
+
+            // The ActionContextAccessor must be registered before the UrlHelper as
+            // the UrlHelper will utilize this service.
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
+            // Add scoped means an instance is created once per request.
+            services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
+            {
+                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
+
+                return new UrlHelper(actionContext);
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
