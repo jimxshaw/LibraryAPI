@@ -5,6 +5,7 @@ using Library.API.Models;
 using Library.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,31 @@ namespace Library.API.Controllers
 
             // Retrieve authors entity.
             var authorsFromRepo = _libraryRepository.GetAuthors(authorsResourceParameters);
+
+            // Test if we have a previous page. If true then called the create uri private method, otherwise return null.
+            var previousPageLink = authorsFromRepo.HasPrevious ?
+                CreateAuthorsResourceUri(authorsResourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = authorsFromRepo.HasNext ?
+                CreateAuthorsResourceUri(authorsResourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            // After getting the previous and next page links, we can finally create
+            // our metadata.
+            var paginationMetadata = new
+            {
+                totalCount = authorsFromRepo.TotalCount,
+                pageSize = authorsFromRepo.PageSize,
+                currentPage = authorsFromRepo.CurrentPage,
+                totalPages = authorsFromRepo.TotalPages,
+                previousPageLink = previousPageLink,
+                nextPageLink = nextPageLink
+            };
+
+            // Add custom metadata to the response header.
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
 
             // Use automapper to map entity to DTO.
             var authors = Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);

@@ -37,20 +37,15 @@ namespace Library.API.Helpers
             TotalCount = count;
             PageSize = pageSize;
             CurrentPage = pageNumber;
-            // If we have 101 items then total pages will be 11.
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
-            // This add all the items to the underlying list.
             AddRange(items);
         }
 
         public static PagedList<T> Create(IQueryable<T> source, int pageNumber, int pageSize)
         {
             var count = source.Count();
-            var items = source.Skip((pageNumber - 1) * pageSize)
-                              .Take(pageSize)
-                              .ToList();
-
-            return new PagedList<T>(items, count, pageSize, pageSize);
+            var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            return new PagedList<T>(items, count, pageNumber, pageSize);
         }
     }
 }
