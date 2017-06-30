@@ -71,8 +71,19 @@ namespace Library.API.Services
             // collection has been sorted, filtered or searched.
 
             var collectionBeforePaging = _context.Authors
-                                                    .OrderBy(a => a.FirstName)
-                                                    .ThenBy(a => a.LastName);
+                                                 .OrderBy(a => a.FirstName)
+                                                 .ThenBy(a => a.LastName)
+                                                 .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.Genre))
+            {
+                // Trim and ignore casing.
+                var genreForWhereClause = authorsResourceParameters.Genre
+                                                                   .Trim()
+                                                                   .ToLowerInvariant();
+
+                collectionBeforePaging = collectionBeforePaging.Where(a => a.Genre.ToLowerInvariant() == genreForWhereClause);
+            }
 
             return PagedList<Author>.Create(collectionBeforePaging,
                                             authorsResourceParameters.PageNumber,

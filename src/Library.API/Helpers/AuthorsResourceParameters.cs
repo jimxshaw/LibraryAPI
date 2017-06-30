@@ -28,6 +28,7 @@ namespace Library.API.Helpers
 
         public int PageNumber { get; set; } = 1;
 
+        public string Genre { get; set; }
 
 
 
